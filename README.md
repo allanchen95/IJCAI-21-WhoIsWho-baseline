@@ -1,5 +1,5 @@
 # IJCAI-21-WhoIsWho-baseline
-Name Disambiguation Baseline
+Task-1: Incremental Name Disambiguation Baseline
 
 ### Running step:
 + pre_gen_data.py: pre-generate training and test data.
