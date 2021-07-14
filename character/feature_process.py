@@ -18,6 +18,7 @@ from unidecode import unidecode
 from .name_match.tool.interface import MatchName
 from collections import Counter
 from operator import itemgetter
+from tqdm import tqdm
 np.set_printoptions(suppress=True)
 
 class featureGeneration:
@@ -25,7 +26,7 @@ class featureGeneration:
         self.__loadEssential()
 
     def __loadEssential(self):
-        data_dir = "./"
+        data_dir = "Download from BaiduYun"
         with open(data_dir + 'name_uniq_dict.json', "r") as file:
             self.name_uniq_dict = json.load(file)
         with open(data_dir + 'venue_idf.json', "r") as file:
@@ -184,7 +185,7 @@ class featureGeneration:
         res = []
         # total_ratio = []
         # count = 0
-        for each in total_ins:
+        for each in tqdm(total_ins):
             # count += 1
             index, ins_res = self.atomic_process(each)
             res.append(ins_res)
@@ -227,6 +228,8 @@ class featureGeneration:
         # pid_list = []
         res = []
         total_ratio = []
+        # print(len(each_ins))
+        # exit()
         index, data = each_ins
         for ins in data:
             tmp, ratios = self.process_ranking_feature(ins)
@@ -240,6 +243,9 @@ class featureGeneration:
 
     def process_ranking_feature(self, ins):
         paper_attr, author_paper_attr_list = ins
+        # print(paper_attr)
+        # print(author_paper_attr_list)
+        # exit()
         features = []
         name2clean = {}
         # print(paper_attr)
@@ -267,6 +273,8 @@ class featureGeneration:
         filter_author_names = []
         # print("papers:", len(author_paper_attr_list))
         for each in author_paper_attr_list:
+            # print(each)
+            # exit()
             each_names, each_org, each_venue, each_keywords, each_title = each
             # collect name
             each_names = list(each_names)[:50]
@@ -315,7 +323,7 @@ class featureGeneration:
             
             paper_tfidf = 0.0
             for each in paper_names:
-                name_score = self.get_name_uniq(name2clean[each][0])
+                name_score = self.get_name_uniq(name2clean[each])
                 paper_tfidf += name_score
             
             author_tfidf = 0.0

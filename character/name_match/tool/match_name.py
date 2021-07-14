@@ -53,11 +53,12 @@ def dryRun(names):
 
 
 def match_name(funcs, pnames, anames, name2clean, loose=False):
-    filter_pnames = []
-    for each in pnames:
-        if each not in black_list:
-            filter_pnames.append(each)
+    # filter_pnames = []
+    # for each in pnames:
+    #     if each not in black_list:
+    #         filter_pnames.append(each)
 
+    filter_pnames = pnames
     if len(filter_pnames) == 0:        
         return [], []
     
@@ -78,3 +79,43 @@ def match_name(funcs, pnames, anames, name2clean, loose=False):
     pt = [name2clean[a] for a in pt]
     pt = set(pt)
     return pt
+
+
+def findMain(funcs, name, names, loose=False):
+
+    pt = set()
+    pt_list = []
+    # pt.add(name)
+    name_l = cleaning_name(name)
+    token_l = cleaning_name(tokenize_name(name))
+    index = 0
+    for dname in names:
+        if dname in pt:
+            pt_list.append((dname, index))
+            continue
+        dname_l = cleaning_name(dname)
+        is_match = False
+        for f in funcs:
+            if f(name_l, dname_l, loose):
+                pt.add(dname)
+                pt_list.append((dname, index))
+                is_match = True
+                break
+        if not is_match:
+            dname_token_l = cleaning_name(tokenize_name(dname))
+            for f in funcs:
+                if f(token_l, dname_token_l, loose):
+                    pt.add(dname)
+                    pt_list.append((dname, index))
+                    break
+        # else:
+        #     if not dryRun([cleaning_name(a) for a in pt]) and not dryRun(
+        #         [cleaning_name(tokenize_name(a)) for a in pt]):
+        #         pt.remove(dname)
+        index += 1
+    last_f = set()
+    for dname in names:
+        if dname not in pt:
+            last_f.add(dname)
+
+    return pt_list, last_f

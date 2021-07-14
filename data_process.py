@@ -19,10 +19,8 @@ class raw_data:
 
 
     def _load_raw_data(self):
-
-        paper_data_dir = "/training_data/"
+        paper_data_dir = "yourTrainingDataDir/"
         # train_data
-        # you need to generate you own training and test data
         with open(paper_data_dir + "train_author_profile.json", 'r') as files:
             self.train_author_profile = json.load(files) 
         with open(paper_data_dir + "train_author_unass.json", 'r') as files:
@@ -41,7 +39,6 @@ class raw_data:
         self.train_paper2aid2name, self.train_paper_list = self.filter_raw_author_data(self.train_author_profile, self.train_author_test, configs["train_min_papers_each_author"], configs["train_neg_sample"])
         self.test_paper2aid2name, self.test_paper_list = self.filter_raw_author_data(self.test_author_profile, self.test_author_test, configs["train_min_papers_each_author"], configs["test_neg_sample"])
         print("Paper: Train: {} Test: {}".format(len(self.train_paper2aid2name), len(self.test_paper2aid2name)))
-
 
     def filter_raw_author_data(self, profile, unassign, min_paper, neg_sample):
         # author_data = {}
@@ -228,28 +225,7 @@ class raw_data:
         (pos_per_str_features, pos_per_inputs),\
         (neg_per_str_features, neg_per_inputs)
 
-            
-    # def get_res_abs(self, papers_attr):
-    #     # print(papers_attr)
-    #     try:
-    #         title = papers_attr["title"].strip().lower()
-    #     except:
-    #         title = ""
-
-    #     # try:
-    #         # abstract = papers_attr["abstract"].strip().lower()
-    #     # except:
-    #         # abstract = ""    
-    
-    #     # whole_info = keywords_info
-    #     # whole_info_str = title + ' ' + abstract
-    #     whole_info_str = title
-    #     # print(whole_info_str)
-    #     if(len(whole_info_str.strip().lower()) == 0):
-    #         return False, ""
-    #     else:
-    #         return True, whole_info_str
-
+  
     def get_res_abs(self, papers_id):
         split_info = papers_id.split('-')
         pid = str(split_info[0])
@@ -316,103 +292,7 @@ class raw_data:
         keywords_str = " ".join(keywords_info).strip()
 
 
-        # whole_info = keywords_info
-        # name_info_str = name_str.strip()
-        # whole_info_str = title + ' ' + keywords_str + " " + org_str + ' ' + venue
         semi_str = org_str + venue
         semantic_str = title + " " + keywords_str
-        # whole_info_str = whole_info_str.strip()
-        # print(whole_info_str)
-        # if(len(whole_info_str) == 0) or (len(name_info_str) == 0):
-        #     return False, "", ""
-        # total_info_str = title + " " + keywords_str + " " + " " + org_str + " " + venue
 
         return (name_info, org_str, venue, keywords_str, keywords_info, title, abstract, semi_str, semantic_str)
-
-
-    # def get_res_abs(self, papers_id):
-    #     split_info = papers_id.split('-')
-    #     pid = str(split_info[0])
-    #     author_index = int(split_info[1])
-    #     papers_attr = self.paper_info[pid]
-    #     # print(papers_attr)
-    #     try:
-    #         title = papers_attr["title"].strip().lower()
-    #     except:
-    #         title = ""
-
-    #     try:
-    #         abstract = papers_attr["abstract"].strip().lower()
-    #     except:
-    #         abstract = ""
-    #     # print(abstract)
-    #     # exit()
-    #     whole_info_str = title + " " + abstract
-    #     whole_info_str = whole_info_str.strip()
-
-    #     return True, whole_info_str
-
-
-    def paper_encoder(self, paper_id):
-    
-        # papers_attr = self.paper_info[paper_id]
-        paper_attr = self.get_res_abs(paper_id)
-        name_info, org_str, venue, keywords_str, keywords_info, title, abs_info, semi_str, semantic_str = paper_attr
-
-        # total_str = semi_str.strip() + ' ' + semantic_str.strip()
-    
-
-        bert_token= self.bertTokenizer.build_inputs(title=title, abstract=abs_info, venue=venue, authors= name_info, concepts=keywords_info, affiliations=org_str)
-        return (name_info, org_str, venue, keywords_str, title), (bert_token)
-        # outputs = self.bertTokenizer.encode_plus(total_str, max_length = configs["train_max_per_len"], truncation=True)
-        # input_ids = outputs["input_ids"]
-        # # print(len(attr_input_ids))
-        # attention_masks = [1] * len(input_ids)
-        # # type_ids = [0] * 
-
-        # padding_length = configs["train_max_per_len"] - len(input_ids)
-        # padding_input_ids = input_ids + [0] * padding_length
-        # # qa_padding_token_type_ids = qa_token_type_ids + [1] * padding_length
-        # padding_attention_masks = attention_masks + [0] * padding_length
-        # # qa_padding_positions_id = qa_position_ids + [0] * padding_length  
-
-        # return (name_info, org_str, venue, keywords_str, title), (padding_input_ids, padding_attention_masks)
-        # return (name_info, org_str, venue, keywords_str, semi_padding_input_ids, semi_padding_attention_masks, semantic_padding_input_ids, semantic_padding_attention_masks)
-
-    # def author_encoder(self, paper_list):
-    #     author_name_info = []
-    #     author_org = []
-    #     author_venue = []
-    #     author_keywords = []
-    #     author_title = []
-    #     author_str = []
-    #     # author_semi_str = []
-    #     # author_semantic_str = []
-    #     for pid in paper_list:  
-    #         paper_attr = self.get_res_abs(pid)
-    #         name_info, org_str, venue, keywords_str, title, semi_str, semantic_str  = paper_attr
-    #         author_name_info.append(name_info)
-    #         author_org.append(org_str)
-    #         author_venue.append(venue)
-    #         author_keywords.append(keywords_str)
-    #         author_title.append(title)
-    #         total_str = semi_str.strip() + ' ' + semantic_str.strip()
-    #         author_str.append(total_str)
-        
-    #     author_str = ' '.join(author_str)
-    #     outputs = self.bertTokenizer.encode_plus(author_str, max_length = configs["train_max_whole_len"], truncation=True)
-    #     input_ids = outputs["input_ids"]
-    #     # print(len(attr_input_ids))
-    #     attention_masks = [1] * len(input_ids)
-    #     # type_ids = [0] * 
-
-    #     padding_length = configs["train_max_whole_len"] - len(input_ids)
-    #     padding_input_ids = input_ids + [0] * padding_length
-    #     # qa_padding_token_type_ids = qa_token_type_ids + [1] * padding_length
-    #     padding_attention_masks = attention_masks + [0] * padding_length
-    #     # qa_padding_positions_id = qa_position_ids + [0] * padding_length  
-
-
-    #     return (author_name_info, author_org, author_venue, author_keywords, author_title), (padding_input_ids, padding_attention_masks)
-    #     # return (name_info, org_str, venue, keywords_str, semi_padding_input_ids, semi_padding_attention_masks, semantic_padding_input_ids, semantic_padding_attention_masks)
-

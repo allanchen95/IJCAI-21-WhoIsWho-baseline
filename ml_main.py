@@ -1,5 +1,8 @@
 # import sys
 # sys.path.append("./")
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 import torch
 import pickle
 import torch.nn as nn
@@ -124,11 +127,14 @@ if __name__ == "__main__":
     # print(whole_test_y.shape)
     st = time()
     xg_model = XGBClassifier(
-        max_depth=7, learning_rate=0.05, n_estimators=2000, subsample=0.8,
+        max_depth=7, learning_rate=0.01, n_estimators=1000, subsample=0.8,
         n_jobs=-1, min_child_weight=6, random_state=666
         )
     xg_model.fit(whole_train_x, whole_train_y)
     # print("")
+    xg_model.save_model("xgboost.json")
+    print("load model.")
+    xg_model.load_model("xgboost.json")
     print("Train Complete! Cost: %.6f"%(time() - st))
     s_t = time()
     total_matching_score = []

@@ -1,5 +1,5 @@
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "4"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 import os
 import torch
@@ -42,33 +42,15 @@ def get_batch_emb(info):
 
 def cluster_data2torch(embed_ins, feature_ins, device):
     # feature based
-    # print(np.array(feature_ins).shape)
     pos_feature = torch.tensor(feature_ins[-1:]).to(device ,non_blocking=True)
     neg_feature = torch.tensor(feature_ins[:-1]).to(device ,non_blocking=True)
 
     paper_pro, pos_pro, neg_pro = embed_ins
-    # print(len(paper_pro))
-    # print(len(pos_pro))
-    # print(len(neg_pro))
-    # exit()
-    # paper
     paper_embedding = get_batch_emb(paper_pro[0])
-    # print(paper_embedding.size())
-    # print(pos_semi_inputs.size())
-    # print(pos_semantic_inputs.size())
     pos_per_embedding = get_batch_emb(pos_pro[0])
-    # print(pos_per_embedding.size())
-
-    # print(pos_per_semi_inputs.size())
-    # print(pos_per_semantic_inputs.size())
-    # neg_author
     neg_per_embedding_list = []
-    # print(len(neg_pro[0]))
-    # for (each_per_in, each_per_masks) in zip(neg_pro[2], neg_pro[3]):
     for each in neg_pro[0]:
-        # print(len(each))
         per_embed = get_batch_emb(each)
-        # print(per_embed.size())
         neg_per_embedding_list.append(per_embed)
 
     return paper_embedding, pos_per_embedding, neg_per_embedding_list, pos_feature, neg_feature
@@ -257,99 +239,3 @@ if __name__ == "__main__":
         with open(saved_dir + "prepared_test_data_" + str(round_num+1) + ".pkl", 'wb') as files:
             pickle.dump(total_test_data, files)
     # ---------------------------------------------------
-
-
-    # # Training with the prepared data
-    # with open("prepared_train_data.pkl", 'rb') as files:
-    #     total_train_data = pickle.load(files)
-    # with open("prepared_test_data.pkl", 'rb') as files:
-    #     total_test_data = pickle.load(files)
-
-    # # for batch_num in tqdm(range(len(total_train_data))):
-    # #     batch_train_data = total_train_data[batch_num]
-    # #     for instance in batch_train_data:
-    # #         pos_data, neg_data_list = instance
-    # #         pos_whole_sim, pos_each_sim, pos_feature = pos_data
-    # #         pos_whole_sim.to(bert_device)
-    # #         pos_each_sim.to(bert_device)
-    # #         pos_feature.to(bert_device)
-
-    # #         pos_score = l2r(pos_whole_sim, pos_each_sim, pos_feature)
-
-    # max_hits = 0
-    # min_test_loss = 10.0
-    # # file_name = "./l2_3_adversarial_checkpoints/"
-    # for epoch in range(configs["n_epoch"]):
-    #     l2r.train()
-    #     epoch_total_loss = []
-    #     epoch_matching_loss = []
-
-    #     batch_total_loss = []
-
-    #     optimizer.zero_grad()
-    #     s_time = time.time()
-    #     random.shuffle(torch_train_data)
-    #     for batch_num in tqdm(range(len(total_train_data))):
-    #         batch_data = total_train_data[batch_num]
-    #         batch_pos_score = []
-    #         batch_neg_score = []
-    #         random.shuffle(batch_data)
-    #         #  = generate_embedings(embedding_model, batch_data)
-    #         for ins_num in range(len(batch_data)):
-    #             instance = batch_data[ins_num]
-    #             pos_data, neg_data_list = instance
-    #             pos_whole_sim, pos_each_sim, pos_feature = pos_data
-    #             pos_whole_sim.to(bert_device)
-    #             pos_each_sim.to(bert_device)
-    #             pos_feature.to(bert_device)
-    #             pos_score = l2r(pos_whole_sim, pos_each_sim, pos_feature)
-                
-    #             for each_data in neg_data_list:
-    #                 each_whole_sim, each_each_sim, each_feature = each_data
-    #                 # print(each_whole_sim.size())
-    #                 each_whole_sim.to(bert_device)
-    #                 each_each_sim.to(bert_device)
-    #                 each_feature.to(bert_device)     
-    #                 each_feature = each_feature.unsqueeze(0)
-    #                 # print(each_feature.size())
-    #                 neg_score = l2r(each_whole_sim, each_each_sim, each_feature)
-    #                 batch_pos_score.append(pos_score)
-    #                 batch_neg_score.append(neg_score)
-    #                 # exit()
-
-    #         batch_pos_score = torch.cat(batch_pos_score)
-    #         batch_neg_score = torch.cat(batch_neg_score)
-    #         # batch_pos_shape = batch_pos_score.size().item()
-    #         # batch_neg_shape = batch_neg_score.size().item()
-    #         # assert batch_pos_shape[0] == batch_neg_score().size()[0] == (configs["local_accum_step"] * configs["train_neg_sample"])
-    #         # print(batch_pos_score)
-    #         # print(batch_neg_score)
-    #         # print(batch_pos_score.size())
-    #         # print(batch_neg_score.size())
-    #         # exit()
-    #                 # time.sleep(3)
-    #         marginLoss = criterion(batch_pos_score, batch_neg_score, rank_y)
-    #         marginLoss.backward()
-    #         optimizer.step()
-    #         optimizer.zero_grad()
-    #         batch_total_loss.append(marginLoss.item())
-    #     e_t = time.time()
-    #     epoch_loss = np.array(batch_total_loss)
-    #     avg_epoch_loss =np.mean(epoch_loss)
-    #     print("Epoch: {} loss: {} cost: {}".format(epoch+1, round(avg_epoch_loss, 6), round(e_t - s_time, 6)))
-    #     if((epoch+1) % configs["show_step"] == 0):
-    #         optimizer.zero_grad()
-    #         # test_loss = []
-    #         # matching_score = []
-    #         ratio_top_k = test_model(embedding_model, matching_model, total_test_data)
-    #         # embedding_model.eval()
-    #         l2r.train()
-    #         # if(ratio_top_k[0] > max_hits):
-    #         #     max_hits = ratio_top_k[0]
-    #         #     print("Save checkpoint!")
-    #         #     state = {'l2r_model': l2r.state_dict()}
-    #         #     torch.save(state, saved_file + "model_" + str(epoch))
-    #         # shared_encoder.train()
-    #     # print("Epoch: {} loss: {:.3f} cost: {:.3f}".format(epoch, avg_epoch_loss, time.time() - s_time))
-                    
-       
