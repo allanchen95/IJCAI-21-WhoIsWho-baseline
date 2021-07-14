@@ -1,6 +1,8 @@
 # IJCAI-21-WhoIsWho-baseline
 Task-1: Incremental Name Disambiguation Baseline
 
+**!!! You may want to read the *feature+bert.pptx* for brief revirw.**
+
 ### Running step:
 
 + **Data process** 
