@@ -296,3 +296,16 @@ class raw_data:
         semantic_str = title + " " + keywords_str
 
         return (name_info, org_str, venue, keywords_str, keywords_info, title, abstract, semi_str, semantic_str)
+
+
+    def paper_encoder(self, paper_id):
+    
+        # papers_attr = self.paper_info[paper_id]
+        paper_attr = self.get_res_abs(paper_id)
+        name_info, org_str, venue, keywords_str, keywords_info, title, abs_info, semi_str, semantic_str = paper_attr
+
+        # total_str = semi_str.strip() + ' ' + semantic_str.strip()
+    
+
+        bert_token= self.bertTokenizer.build_inputs(title=title, abstract=abs_info, venue=venue, authors= name_info, concepts=keywords_info, affiliations=org_str)
+        return (name_info, org_str, venue, keywords_str, title), (bert_token)
