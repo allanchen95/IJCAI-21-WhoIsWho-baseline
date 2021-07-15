@@ -70,6 +70,10 @@ for author_name, authors in author_pub.items():
     new_author_unassigned[author_name] = tmp_unass
 
 
+# new_author_profile/unass == train/test_author_profile/unass.json
+# new_pub_profile + new_pub_unass == train_pub.json
+
+
 print("profile: ")
 print_info(new_author_profile)
 print(len(new_pub_profile))
@@ -77,3 +81,4 @@ print("unass: ")
 print_info(new_author_unassigned)
 print(len(new_pub_unass))
 
+# new_author

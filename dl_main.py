@@ -250,7 +250,7 @@ if __name__ == "__main__":
 
 
     # Training with the prepared data
-    data_dir = "/ssd/chenbo/compData/"
+    data_dir = "yourDataDir/"
     with open(data_dir + "prepared_train_data_1.pkl", 'rb') as files:
         total_train_data = pickle.load(files)
     with open(data_dir + "prepared_test_data_1.pkl", 'rb') as files:
@@ -331,14 +331,14 @@ if __name__ == "__main__":
             optimizer.zero_grad()
             # test_loss = []
             # matching_score = []
-            ratio_top_k = test_model(total_test_data)
+            mrr = test_model(total_test_data)
             # embedding_model.eval()
             l2r.train()
-            # if(ratio_top_k[0] > max_hits):
-            #     max_hits = ratio_top_k[0]
-            #     print("Save checkpoint!")
-            #     state = {'l2r_model': l2r.state_dict()}
-            #     torch.save(state, saved_file + "model_" + str(epoch))
+            if(mrr > max_hits):
+                max_hits = mrr
+                print("Save checkpoint!")
+                state = {'l2r_model': l2r.state_dict()}
+                torch.save(state, "semantic_model_" + str(epoch))
             # shared_encoder.train()
         # print("Epoch: {} loss: {:.3f} cost: {:.3f}".format(epoch, avg_epoch_loss, time.time() - s_time))
                     

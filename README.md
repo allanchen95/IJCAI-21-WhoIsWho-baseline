@@ -6,7 +6,7 @@ Task-1: Incremental Name Disambiguation Baseline
 ### Running step:
 
 + **Data process** 
-  + splitProUnass.py: generate train author profile/unass files.
+  + splitProUnass.py: Split train/test set, and then generate train/test author profile/unass files.
   + pre_gen_data.py: pre-generate training and test data for later training.
     + Downloading the IDF files via https://pan.baidu.com/s/1g1w2m20V4WPj0YNGYyF8Tw  passwd: y2ws
     + Training data here is composed of training set provided by the competition and na-v2 version of WhoIsWho (https://www.aminer.cn/whoiswho).
@@ -47,3 +47,4 @@ Go to folder *evaluation/*
 
 + **Bert-based semantic model (41-d feature)**
 
+(Please refer the evaluation procedure of feature enginering with loading trained semantic model.)

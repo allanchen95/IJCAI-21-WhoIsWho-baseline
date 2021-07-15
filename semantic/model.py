@@ -65,35 +65,6 @@ class bertEmbeddingLayer(nn.Module):
         return _, pooled_output
 
 
-
-# class bertEmbeddingLayer(nn.Module):
-#     def __init__(self):
-#         super(bertEmbeddingLayer, self).__init__()
-#         # output_dir = "/home/chenbo/entity_linking/bert_generator/bert-base-multilingual-cased/"
-#         output_dir = "/home/chenbo/scibert_scivocab_uncased/"
-#         # output_dir = "/home/chenbo/bert-base-uncased/"
-#         self.bertModel = BertModel.from_pretrained(output_dir)
-#         # self.Encoder = nn.Sequential(
-#         #     nn.Linear(configs["hidden_size"], configs["hidden_size"])
-#         # )       
-
-
-#     def forward(self, ins_token_inputs, ins_attention_mask, ins_position_ids = None):
-#         outputs = self.bertModel(input_ids = ins_token_inputs, attention_mask = ins_attention_mask)     
-#         # outputs:
-#             # 1. last_hidden_state: the last layer of the model. (batch_size, sequence_length, hidden_size)
-#             # 2. pooler_output: last layer hidden-state of the first token further processed by a Linear layer and a Tanh activation function.(batch_size, hidden_size)
-#             # 3. hidden_states: the output of each layer plus the initial embedding outputs. (batch_size, sequence_length, hidden_size)
-#         last_layer = outputs[0]
-#         pooler_out = outputs[1]
-#         # token_embeddings_last_4_layers = torch.cat((outputs[2][-1], outputs[2][-2], outputs[2][-3], outputs[2][-4]), 2) #[batch_size, seqence_len, 4 * 768]
-#         # output_encoder = self.Encoder(last_layer[:, 0])
-#         # output_encoder = self.Encoder(last_layer)
-#         # return pooler_out, token_embeddings_last_4_layers[:, 0], output_encoder
-#         # return last_layer, pooler_out, token_embeddings_last_4_layers
-#         return last_layer, pooler_out
-
-
 def kernal_mus(n_kernels):
     """
     get the mu for each guassian kernel. Mu is the middle of each bin
@@ -225,68 +196,6 @@ class learning2Rank(nn.Module):
 
 
 
-
-class ML_learning2Rank(nn.Module):
-    def __init__(self):
-        super(ML_learning2Rank, self).__init__()
-        # self.n_bins = configs["feature_len"] * 2 
-        self.learning2Rank = nn.Sequential(
-            nn.Linear(configs["str_len"], configs["str_len"]),
-            nn.Dropout(0.2),
-            # F.dropout(0.5, training=self.training),
-            nn.LeakyReLU(0.2, True),
-            nn.Linear(configs["str_len"], configs["str_len"]),
-            nn.Dropout(0.2),
-            # F.dropout(0.5, training=self.training),
-            nn.LeakyReLU(0.2, True),
-            nn.Linear(configs["str_len"], 1),
-            # nn.Tanh()
-            nn.Sigmoid()
-        )
-        self.str_vec = strMlp()
-        
-
-    def forward(self, str_feature):
-
-        output = self.learning2Rank(str_feature)
-        return output
-
-
-
-
-class DL_learning2Rank(nn.Module):
-    def __init__(self):
-        super(DL_learning2Rank, self).__init__()
-        # self.n_bins = configs["feature_len"] * 2 
-        self.learning2Rank = nn.Sequential(
-            nn.Linear(configs["dl_len"], configs["dl_len"]),
-            nn.Dropout(0.2),
-            # F.dropout(0.5, training=self.training),
-            nn.LeakyReLU(0.2, True),
-            nn.Linear(configs["dl_len"], configs["dl_len"]),
-            nn.Dropout(0.2),
-            # F.dropout(0.5, training=self.training),
-            nn.LeakyReLU(0.2, True),
-            nn.Linear(configs["dl_len"], 1),
-            # nn.Tanh()
-            nn.Sigmoid()
-        )
-
-        # self.mf_model = multiField()
-        self.mi_model = multiInstance()
-        # self.str_vec = strMlp()
-        
-
-    def forward(self, whole_sim, each_sim):
-
-        mi_mf_each_sim = self.mi_model(each_sim)
-
-        total_vec = torch.cat((whole_sim, mi_mf_each_sim), 1)
-
-        output = self.learning2Rank(total_vec)
-
-        return output
-
  
 class strMlp(nn.Module):
     def __init__(self):
@@ -310,74 +219,3 @@ class strMlp(nn.Module):
         return str2vec
 
 
- 
-class multiInstance(nn.Module):
-    """
-    kernel pooling layer
-    """
-    def __init__(self):
-        """
-        :param mu: |d| * 1 dimension mu
-        :param sigma: |d| * 1 dimension sigma
-        """
-        super(multiInstance, self).__init__()
-        self.n_bins = 22
-        # self.miDenseLayer = nn.Sequential(
-        #     nn.Linear(self.n_bins, 1)
-        # )
-        self.miDenseLayer = nn.Sequential(
-            nn.Linear(self.n_bins, self.n_bins),
-            nn.LeakyReLU(0.2, True),
-            nn.Linear(self.n_bins, self.n_bins),
-            nn.LeakyReLU(0.2, True),
-            nn.Linear(self.n_bins, 1)
-        )
-
-
-    def forward(self, mi_sim_vec):
-        mi_attention = self.miDenseLayer(mi_sim_vec)
-        # mi_attention = torch.exp(mi_attention.squeeze(-1))
-        # # print(mi_attention.size())
-        # sumed = torch.sum(mi_attention, dim = 1).unsqueeze(-1)
-        # mi_attention = (mi_attention / sumed).unsqueeze(-1)
-        # print(mi_attention.size())
-        # exit()
-        mi_softmax = F.softmax(mi_attention, dim = 0)
-        # print(mi_softmax)
-        
-        # print(mi_sim_vec[:, :6])
-        # exit()
-        sum_sim_vec = torch.sum(mi_sim_vec * mi_softmax, dim = 0).unsqueeze(0)
-        return sum_sim_vec
-
-
-class multiField(nn.Module):
-
-    def __init__(self):
-        """
-        :param mu: |d| * 1 dimension mu
-        :param sigma: |d| * 1 dimension sigma
-        """
-        self.n_bins = configs["feature_len"]
-        super(multiField, self).__init__()
-        self.mfDenseLayer = nn.Sequential(
-            nn.Linear(self.n_bins, 1),
-            nn.Tanh()
-        )
-   
-    def forward(self, sim_vec1, sim_vec2):
-        if(len(sim_vec1.size()) == 1):
-            sim_vec1 = sim_vec1.unsqueeze(0)
-            sim_vec2 = sim_vec2.unsqueeze(0)
-        sim_shape = sim_vec1.size()
-        dims = len(sim_shape) - 1
-        sim1_att = self.mfDenseLayer(sim_vec1)
-        sim2_att = self.mfDenseLayer(sim_vec2)
-        attention = torch.cat((sim1_att, sim2_att), dims)
-        softmax = F.softmax(attention, dim = dims)
-        a1, a2 = torch.split(softmax, 1, dims)
-        # print("so: ", softmax.size())
-        # print(softmax[:, 0].size())
-        merge_vec = sim_vec1 * a1 + sim_vec2 * a2
-
-        return merge_vec
